@@ -13,8 +13,9 @@ export default function ImageResizer() {
   const imageTitleRef = useRef<HTMLInputElement>(null);
   const dimensions = DEFAULT_DIMENSIONS;
   const dimensionOptions = {
-    "mac-status-icon": "Mac Status icon",
     "mac-app-icon": "Mac App icon",
+    "mac-default-icon": "Mac Default icon",
+    "mac-status-icon": "Mac Status icon",
     "mac-sidebar-icon": "Mac Sidebar icon",
     "ios-app-icon": "iOS App icon",
     "browser-extension-icon": "Browser Extension icon",
@@ -138,8 +139,8 @@ export default function ImageResizer() {
   }
 
   return (
-    <div className="inset-0 flex items-center justify-center w-full z-50">
-      <div className="w-full mx-20 xl:mx-60 h-fit rounded-lg overflow-hidden shadow-xl">
+    <div className="inset-0 flex items-center justify-center w-full h-full z-50 pb-20">
+      <div className="w-full md:mx-20 mx-4 xl:mx-60 h-fit rounded-lg overflow-hidden shadow-xl">
         <div className="h-8 bg-gradient-to-b from-[#2584e4] via-[#0f71ce] to-[#3a8cda] flex items-center px-3">
           <span className="text-white text-sm font-semibold">Resize Image</span>
         </div>
@@ -173,9 +174,9 @@ export default function ImageResizer() {
             <div className="flex flex-col gap-2 w-full items-center">
               <div className="flex flex-col gap-2 w-full items-center">
                 <h2>Selected Image</h2>
-                <div className="overflow-auto w-[450px] h-[400px] bg-white p-2 rounded-md">
+                <div className="w-full h-64 bg-white p-2 rounded-md">
                   <div className="relative w-full h-full">
-                    <div className="absolute  inset-0 bg-[repeating-conic-gradient(#808080_0_90deg,#ffffff_90deg_180deg)] bg-[length:20px_20px] opacity-50"></div>
+                    <div className="absolute inset-0 bg-[repeating-conic-gradient(#808080_0_90deg,#ffffff_90deg_180deg)] bg-[length:20px_20px] opacity-50"></div>
                     {!imageUrl && (
                       <span className="absolute w-full h-full flex items-center justify-center text-8xl">
                         📷
@@ -206,7 +207,7 @@ export default function ImageResizer() {
                 Download All
               </button>
             </div>
-            <div className="flex flex-col gap-2 w-full justify-start">
+            <div className="flex flex-col gap-2 w-full justify-start overflow-y-scroll h-96">
               <h2>Dimensions (px)</h2>
               <div className="flex flex-row gap-2 w-full items-center">
                 <div className="flex flex-row gap-2 w-full items-start">
@@ -250,7 +251,7 @@ export default function ImageResizer() {
                 )}
               </div>
 
-              <div className="overflow-scroll w-full h-fit p-2 rounded-md justify-start flex gap-4 flex-col">
+              <div className="w-full h-fit p-2 rounded-md justify-start flex gap-4 flex-col">
                 {dimensions[selectedDimension as keyof typeof dimensions].map(
                   (dimension, index) => (
                     <div

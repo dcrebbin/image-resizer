@@ -8,7 +8,7 @@ export default function Home() {
   const memoizedWindow7Wisps = useMemo(() => <Window7Wisps />, []);
 
   return (
-    <div className="flex flex-col gap-4 w-full justify-center items-center z-50">
+    <div className="flex flex-col gap-4 w-full justify-center items-center h-full">
       <IntroDialog />
       <ImageResizer />
       <div className="fixed z-50 bottom-0 w-full h-10 bg-gradient-to-b from-[#2584e4] via-[#0f71ce] to-[#3a8cda] flex items-center px-3">

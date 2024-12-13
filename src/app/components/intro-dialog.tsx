@@ -1,7 +1,7 @@
 export default function IntroDialog() {
   return (
     <div className="inset-0 flex items-center justify-center p-4">
-      <div className="w-full mx-20 h-fit rounded-lg overflow-hidden shadow-xl">
+      <div className="w-full md:mx-20 mx-4 xl:mx-60 h-fit rounded-lg overflow-hidden shadow-xl">
         <div className="h-8 bg-gradient-to-b from-[#2584e4] via-[#0f71ce] to-[#3a8cda] flex items-center px-3">
           <span className="text-white text-sm font-semibold">
             Ez Image Resizer

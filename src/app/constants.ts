@@ -8,6 +8,11 @@ export const DEFAULT_DIMENSIONS = {
     { width: 512, height: 512 },
     { width: 1024, height: 1024 },
   ],
+  "mac-default-icon": [
+    { width: 32, height: 32 },
+    { width: 64, height: 64 },
+    { width: 128, height: 128 },
+  ],
   "mac-status-icon": [
     { width: 7, height: 7 },
     { width: 14, height: 14 },
