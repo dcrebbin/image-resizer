@@ -1,101 +1,137 @@
+"use client";
+
+import { useState, useRef } from "react";
 import Image from "next/image";
+const initialDimensions = [{ width: 100, height: 100 }];
 
 export default function Home() {
+  const [dimensions, setDimensions] = useState(initialDimensions);
+
+  const widthInputRef = useRef<HTMLInputElement>(null);
+  const heightInputRef = useRef<HTMLInputElement>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [resizedImages, setResizedImages] = useState<string[]>([]);
+  const handleAddDimension = () => {
+    const width = Number(widthInputRef.current?.value) || 0;
+    const height = Number(heightInputRef.current?.value) || 0;
+    setDimensions([...dimensions, { width, height }]);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleResize = async () => {
+    const resizedImages = await resizeImage(imageUrl, dimensions);
+    // Handle each resized image
+    setResizedImages(resizedImages);
+  };
+
+  const resizeImage = async (
+    imageUrl: string | null,
+    dimensions: { width: number; height: number }[]
+  ): Promise<string[]> => {
+    if (!imageUrl) return [];
+
+    // Create a promise to load the image
+    const loadImage = (url: string): Promise<HTMLImageElement> => {
+      return new Promise((resolve, reject) => {
+        const img = document.createElement("img");
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = url;
+      });
+    };
+
+    try {
+      const img = await loadImage(imageUrl);
+      const resizedImages = dimensions.map(({ width, height }) => {
+        // Create canvas
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        // Draw and resize image
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Could not get canvas context");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert to base64
+        return canvas.toDataURL("image/jpeg", 0.9);
+      });
+
+      return resizedImages;
+    } catch (error) {
+      console.error("Error resizing image:", error);
+      return [];
+    }
+  };
+
+  function downloadImage() {
+    const a = document.createElement("a");
+    a.href = resizedImages[0];
+    a.download = "image.jpg";
+    a.click();
+  }
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      <h1>Image Resizer</h1>
+      <div className="flex flex-col gap-4">
+        <input type="file" onChange={handleImageChange} />
+        <button onClick={handleAddDimension}>Add</button>
+        <h2>Dimensions</h2>
+        <button onClick={handleResize}>Resize</button>
+        <div className="flex flex-row gap-2">
+          <div className="flex flex-col gap-2">
+            <label htmlFor="width">Width</label>
+            <div className="flex flex-row gap-2 ">
+              <input
+                ref={widthInputRef}
+                type="number"
+                className="w-16 text-black text-end"
+                id="width"
+              />
+              <span>px</span>
+            </div>
+          </div>
+          <div>
+            <span>x</span>
+          </div>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="height">Height</label>
+            <div className="flex flex-row gap-2">
+              <input
+                ref={heightInputRef}
+                type="number"
+                className="w-16 text-black text-end"
+                id="height"
+              />
+              <span>px</span>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <div className="flex flex-col gap-2">
+          <h2>Uploaded Image</h2>
+          {imageUrl && (
+            <Image src={imageUrl} alt="Image" width={100} height={100} />
+          )}
+          <h2>Resized Images</h2>
+          {resizedImages.map((imageUrl, index) => (
+            <Image
+              key={index}
+              src={imageUrl}
+              alt={`Resized Image ${index}`}
+              width={100}
+              height={100}
+            />
+          ))}
+        </div>
+        <button onClick={downloadImage}>Save</button>
+      </div>
     </div>
   );
 }
