@@ -10,7 +10,7 @@ export default function Home() {
   const [selectedDimension, setSelectedDimension] = useState<string | null>(
     "mac-status-icon"
   );
-
+  const imageTitleRef = useRef<HTMLInputElement>(null);
   const dimensions = {
     "mac-status-icon": [
       { width: 7, height: 7 },
@@ -37,10 +37,15 @@ export default function Home() {
     }
   };
 
-  const resizeImage = async (imageUrl: string | null): Promise<string[]> => {
-    if (!imageUrl) return [];
+  const resizeImage = async (
+    imageUrl: string | null,
+    dimension: { width: number; height: number } | null = null
+  ): Promise<string[]> => {
+    if (!imageUrl) {
+      alert("No image selected");
+      return [];
+    }
 
-    // Create a promise to load the image
     const loadImage = (url: string): Promise<HTMLImageElement> => {
       return new Promise((resolve, reject) => {
         const img = document.createElement("img");
@@ -52,7 +57,20 @@ export default function Home() {
 
     try {
       const img = await loadImage(imageUrl);
-      const resizedImages = dimensions[
+      let resizedImages: string[] = [];
+      if (dimension) {
+        const canvas = document.createElement("canvas");
+        canvas.width = dimension.width;
+        canvas.height = dimension.height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("Could not get canvas context");
+        ctx.drawImage(img, 0, 0, dimension.width, dimension.height);
+
+        resizedImages.push(canvas.toDataURL("image/png", 1));
+        downloadImage(resizedImages);
+        return resizedImages;
+      }
+      resizedImages = dimensions[
         selectedDimension as keyof typeof dimensions
       ].map(({ width, height }) => {
         // Create canvas
@@ -66,9 +84,9 @@ export default function Home() {
         ctx.drawImage(img, 0, 0, width, height);
 
         // Convert to base64
-        return canvas.toDataURL("image/png", 0.9);
+        return canvas.toDataURL("image/png", 1);
       });
-      console.log("Resized images", resizedImages);
+
       downloadImage(resizedImages);
       return resizedImages;
     } catch (error) {
@@ -80,12 +98,28 @@ export default function Home() {
   async function downloadImage(imageUrls: string[]) {
     console.log("Downloading", imageUrls);
     const zip = new JSZip();
+    const imageTitle =
+      imageTitleRef.current?.value
+        .toLowerCase()
+        .replace(/[^a-zA-Z0-9]/g, "_") || "image";
+
+    if (imageUrls.length == 1) {
+      const base64Data = imageUrls[0].split(",")[1];
+      const blob = base64ToBlob(base64Data, "image/png");
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${imageTitle}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
 
     imageUrls.forEach((imageUrl, index) => {
       const base64Data = imageUrl.split(",")[1];
       const blob = base64ToBlob(base64Data, "image/png");
       zip.file(
-        `${
+        `${imageTitle}-${
           dimensions[selectedDimension as keyof typeof dimensions][index].width
         }x${
           dimensions[selectedDimension as keyof typeof dimensions][index].height
@@ -98,7 +132,7 @@ export default function Home() {
     const url = URL.createObjectURL(content);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "images.zip";
+    a.download = `${imageTitle}.zip`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -155,7 +189,12 @@ export default function Home() {
               <h2>Selected Image</h2>
               <div className="overflow-auto w-[300px] h-[300px] bg-white p-2 rounded-md">
                 <div className="relative w-full h-full">
-                  <div className="absolute inset-0 bg-[repeating-conic-gradient(#808080_0_90deg,#ffffff_90deg_180deg)] bg-[length:20px_20px] opacity-50"></div>
+                  <div className="absolute  inset-0 bg-[repeating-conic-gradient(#808080_0_90deg,#ffffff_90deg_180deg)] bg-[length:20px_20px] opacity-50"></div>
+                  {!imageUrl && (
+                    <span className="absolute w-full h-full flex items-center justify-center text-8xl">
+                      📷
+                    </span>
+                  )}
                   {imageUrl && (
                     <Image
                       src={imageUrl}
@@ -164,31 +203,43 @@ export default function Home() {
                       className="object-contain absolute w-full h-full"
                     />
                   )}
-                  {!imageUrl && (
-                    <span className="w-full h-full flex items-center justify-center text-8xl">
-                      📷
-                    </span>
-                  )}
                 </div>
               </div>
             </div>
+            <input
+              type="text"
+              ref={imageTitleRef}
+              placeholder="my-cool-image-title"
+              className="bg-white text-black p-2 rounded-md w-full"
+            />
             <button
               disabled={!imageUrl}
               onClick={() => resizeImage(imageUrl)}
               className="bg-white text-black p-2 rounded-md w-full disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Download
+              Download All
             </button>
           </div>
           <div className="flex flex-col gap-2 w-full justify-start">
             <h2>Dimensions (px)</h2>
-            <div className="overflow-auto w-[100] h-[300px] p-2 rounded-md justify-start">
+            <div className="overflow-auto w-full h-full p-2 rounded-md justify-start flex gap-4 flex-col">
               {dimensions[selectedDimension as keyof typeof dimensions].map(
                 (dimension, index) => (
-                  <div key={index}>
-                    <span>
+                  <div
+                    key={index}
+                    className="flex flex-row gap-2 h-full items-center justify-between"
+                  >
+                    <span className="text-sm text-white underline w-full">
                       {dimension.width}x{dimension.height}
                     </span>
+                    {imageUrl && (
+                      <button
+                        className="bg-white text-black p-2 rounded-md w-10 h-10 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => resizeImage(imageUrl, dimension)}
+                      >
+                        ⬇
+                      </button>
+                    )}
                   </div>
                 )
               )}
