@@ -2,52 +2,42 @@
 
 import { useState, useRef } from "react";
 import Image from "next/image";
-
+import JSZip from "jszip";
 export default function Home() {
-  const widthInputRef = useRef<HTMLInputElement>(null);
-  const heightInputRef = useRef<HTMLInputElement>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [resizedImages, setResizedImages] = useState<string[]>([]);
-  const [uploadedImageDimensions, setUploadedImageDimensions] = useState<{
-    width: number;
-    height: number;
-  } | null>(null);
+  const selectedDimensionRef = useRef<HTMLSelectElement>(null);
 
-  const [resizedImageDimensions, setResizedImageDimensions] = useState<
-    { width: number; height: number }[]
-  >([]);
+  const [selectedDimension, setSelectedDimension] = useState<string | null>(
+    "mac-status-icon"
+  );
+
+  const dimensions = {
+    "mac-status-icon": [
+      { width: 7, height: 7 },
+      { width: 14, height: 14 },
+      { width: 11, height: 11 },
+      { width: 22, height: 22 },
+      { width: 24, height: 24 },
+      { width: 48, height: 48 },
+      { width: 50, height: 50 },
+      { width: 100, height: 100 },
+      { width: 200, height: 200 },
+    ],
+    "mac-app-icon": [
+      { width: 16, height: 16 },
+      { width: 32, height: 32 },
+      { width: 48, height: 48 },
+    ],
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setImageUrl(URL.createObjectURL(file));
-      const img = document.createElement("img");
-      img.onload = () => {
-        setUploadedImageDimensions({ width: img.width, height: img.height });
-      };
-      img.src = URL.createObjectURL(file);
     }
   };
 
-  const handleResize = async () => {
-    const dimensions = [
-      {
-        width: Number(widthInputRef.current?.value),
-        height: Number(heightInputRef.current?.value),
-      },
-    ];
-    const resizedImages = await resizeImage(
-      imageUrl,
-      dimensions as { width: number; height: number }[]
-    );
-    // Handle each resized image
-    setResizedImages(resizedImages);
-  };
-
-  const resizeImage = async (
-    imageUrl: string | null,
-    dimensions: { width: number; height: number }[]
-  ): Promise<string[]> => {
+  const resizeImage = async (imageUrl: string | null): Promise<string[]> => {
     if (!imageUrl) return [];
 
     // Create a promise to load the image
@@ -62,12 +52,13 @@ export default function Home() {
 
     try {
       const img = await loadImage(imageUrl);
-      const resizedImages = dimensions.map(({ width, height }) => {
+      const resizedImages = dimensions[
+        selectedDimension as keyof typeof dimensions
+      ].map(({ width, height }) => {
         // Create canvas
         const canvas = document.createElement("canvas");
         canvas.width = width;
         canvas.height = height;
-        setResizedImageDimensions((prev) => [...prev, { width, height }]);
 
         // Draw and resize image
         const ctx = canvas.getContext("2d");
@@ -78,7 +69,7 @@ export default function Home() {
         return canvas.toDataURL("image/jpeg", 0.9);
       });
       console.log("Resized images", resizedImages);
-      downloadImage(resizedImages[0]);
+      downloadImage(resizedImages);
       return resizedImages;
     } catch (error) {
       console.error("Error resizing image:", error);
@@ -86,81 +77,113 @@ export default function Home() {
     }
   };
 
-  function downloadImage(imageUrl: string) {
-    console.log("Downloading", imageUrl);
+  async function downloadImage(imageUrls: string[]) {
+    console.log("Downloading", imageUrls);
+    const zip = new JSZip();
+
+    imageUrls.forEach((imageUrl, index) => {
+      const base64Data = imageUrl.split(",")[1];
+      const blob = base64ToBlob(base64Data, "image/jpeg");
+      zip.file(
+        `${
+          dimensions[selectedDimension as keyof typeof dimensions][index].width
+        }x${
+          dimensions[selectedDimension as keyof typeof dimensions][index].height
+        }.jpg`,
+        blob
+      );
+    });
+
+    const content = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(content);
     const a = document.createElement("a");
-    a.href = imageUrl;
-    a.download = "image.jpg";
+    a.href = url;
+    a.download = "images.zip";
     a.click();
+    URL.revokeObjectURL(url);
   }
 
-  async function resizeAndDownload() {
-    await resizeImage(imageUrl, [
-      {
-        width: Number(widthInputRef.current?.value),
-        height: Number(heightInputRef.current?.value),
-      },
-    ]).finally(() => {
-      console.log("Downloaded", resizedImages[0]);
-    });
+  function base64ToBlob(base64: string, type: string) {
+    const byteCharacters = atob(base64);
+    const byteArrays = [];
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteArrays.push(byteCharacters.charCodeAt(i));
+    }
+    return new Blob([new Uint8Array(byteArrays)], { type });
+  }
+
+  function setCustomDimension(dimension: string) {
+    setSelectedDimension(dimension);
   }
 
   return (
     <div className="flex flex-col gap-4 w-full justify-center items-center p-4">
       <h1 className="text-2xl font-bold">Image Resizer</h1>
+      <h2 className="text-sm text-white">
+        Client Side Image Resizer for Icons & Promotional Images
+      </h2>
       <div className="flex flex-col gap-4">
-        <input type="file" onChange={handleImageChange} />
-        <h2>Dimensions</h2>
-        <div className="flex flex-row gap-2">
-          <div className="flex flex-col gap-2">
-            <label htmlFor="width">Width</label>
-            <div className="flex flex-row gap-2 ">
-              <input
-                ref={widthInputRef}
-                type="number"
-                className="w-16 text-black text-end"
-                id="width"
-              />
-              <span>px</span>
-            </div>
-          </div>
-          <div>
-            <span>x</span>
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="height">Height</label>
-            <div className="flex flex-row gap-2">
-              <input
-                ref={heightInputRef}
-                type="number"
-                className="w-16 text-black text-end"
-                id="height"
-              />
-              <span>px</span>
-            </div>
-          </div>
+        <div>
+          <input type="file" onChange={handleImageChange} />
+          <button
+            className="bg-white text-black p-2 rounded-md w-fit"
+            onClick={() => setImageUrl(null)}
+          >
+            Clear
+          </button>
         </div>
-        <div className="flex flex-col gap-2 w-full items-center">
-          <h2>Uploaded Image</h2>
-          {imageUrl && (
-            <div className="overflow-auto w-[300px] h-[300px] bg-white p-2 rounded-md">
-              <div className="relative w-full h-full">
-                <Image
-                  src={imageUrl}
-                  alt="Image"
-                  fill
-                  className="object-contain absolute w-full h-full"
-                />
+        <select
+          ref={selectedDimensionRef}
+          className="bg-white text-black p-2 rounded-md text-center w-full"
+          onChange={(e) => setCustomDimension(e.target.value)}
+        >
+          <option value="mac-status-icon">Mac: Status icon</option>
+          <option value="mac-app-icon">Mac: App icon</option>
+        </select>
+        <div className="flex flex-row gap-2 w-full items-start">
+          <div className="flex flex-col gap-2 w-full items-center">
+            <div className="flex flex-col gap-2 w-full items-center">
+              <h2>Selected Image</h2>
+              <div className="overflow-auto w-[300px] h-[300px] bg-white p-2 rounded-md">
+                <div className="relative w-full h-full">
+                  {imageUrl && (
+                    <Image
+                      src={imageUrl}
+                      alt="Image"
+                      fill
+                      className="object-contain absolute w-full h-full"
+                    />
+                  )}
+                  {!imageUrl && (
+                    <span className="w-full h-full flex items-center justify-center text-8xl">
+                      📷
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
-          )}
+            <button
+              onClick={() => resizeImage(imageUrl)}
+              className="bg-white text-black p-2 rounded-md w-full"
+            >
+              Download
+            </button>
+          </div>
+          <div className="flex flex-col gap-2 w-full justify-start">
+            <h2>Dimensions</h2>
+            <div className="overflow-auto w-[100] h-[300px] p-2 rounded-md justify-start">
+              {dimensions[selectedDimension as keyof typeof dimensions].map(
+                (dimension, index) => (
+                  <div key={index}>
+                    <span>
+                      {dimension.width}x{dimension.height}
+                    </span>
+                  </div>
+                )
+              )}
+            </div>
+          </div>
         </div>
-        <button
-          onClick={resizeAndDownload}
-          className="bg-white text-black p-2 rounded-md w-full"
-        >
-          Download
-        </button>
       </div>
     </div>
   );
