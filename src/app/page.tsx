@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import JSZip from "jszip";
+import { DEFAULT_DIMENSIONS } from "./constants";
 export default function Home() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const selectedDimensionRef = useRef<HTMLSelectElement>(null);
@@ -11,25 +12,7 @@ export default function Home() {
     "mac-status-icon"
   );
   const imageTitleRef = useRef<HTMLInputElement>(null);
-  const dimensions = {
-    "mac-status-icon": [
-      { width: 7, height: 7 },
-      { width: 14, height: 14 },
-      { width: 11, height: 11 },
-      { width: 22, height: 22 },
-      { width: 24, height: 24 },
-      { width: 48, height: 48 },
-      { width: 50, height: 50 },
-      { width: 100, height: 100 },
-      { width: 200, height: 200 },
-    ],
-    "mac-app-icon": [
-      { width: 16, height: 16 },
-      { width: 32, height: 32 },
-      { width: 48, height: 48 },
-    ],
-  };
-
+  const dimensions = DEFAULT_DIMENSIONS;
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -161,7 +144,11 @@ export default function Home() {
         then download the images as a zip.
         <br />
       </span>
-      <a href="https://github.com/dcrebbin/image-resizer" className="underline">
+      <a
+        href="https://github.com/dcrebbin/image-resizer"
+        target="_blank"
+        className="underline"
+      >
         Github Repo
       </a>
       <div className="flex flex-col gap-4">
