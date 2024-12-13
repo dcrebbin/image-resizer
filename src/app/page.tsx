@@ -2,30 +2,44 @@
 
 import { useState, useRef } from "react";
 import Image from "next/image";
-const initialDimensions = [{ width: 100, height: 100 }];
 
 export default function Home() {
-  const [dimensions, setDimensions] = useState(initialDimensions);
-
   const widthInputRef = useRef<HTMLInputElement>(null);
   const heightInputRef = useRef<HTMLInputElement>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [resizedImages, setResizedImages] = useState<string[]>([]);
-  const handleAddDimension = () => {
-    const width = Number(widthInputRef.current?.value) || 0;
-    const height = Number(heightInputRef.current?.value) || 0;
-    setDimensions([...dimensions, { width, height }]);
-  };
+  const [uploadedImageDimensions, setUploadedImageDimensions] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
+
+  const [resizedImageDimensions, setResizedImageDimensions] = useState<
+    { width: number; height: number }[]
+  >([]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setImageUrl(URL.createObjectURL(file));
+      const img = document.createElement("img");
+      img.onload = () => {
+        setUploadedImageDimensions({ width: img.width, height: img.height });
+      };
+      img.src = URL.createObjectURL(file);
     }
   };
 
   const handleResize = async () => {
-    const resizedImages = await resizeImage(imageUrl, dimensions);
+    const dimensions = [
+      {
+        width: Number(widthInputRef.current?.value),
+        height: Number(heightInputRef.current?.value),
+      },
+    ];
+    const resizedImages = await resizeImage(
+      imageUrl,
+      dimensions as { width: number; height: number }[]
+    );
     // Handle each resized image
     setResizedImages(resizedImages);
   };
@@ -53,6 +67,7 @@ export default function Home() {
         const canvas = document.createElement("canvas");
         canvas.width = width;
         canvas.height = height;
+        setResizedImageDimensions((prev) => [...prev, { width, height }]);
 
         // Draw and resize image
         const ctx = canvas.getContext("2d");
@@ -62,7 +77,8 @@ export default function Home() {
         // Convert to base64
         return canvas.toDataURL("image/jpeg", 0.9);
       });
-
+      console.log("Resized images", resizedImages);
+      downloadImage(resizedImages[0]);
       return resizedImages;
     } catch (error) {
       console.error("Error resizing image:", error);
@@ -70,21 +86,31 @@ export default function Home() {
     }
   };
 
-  function downloadImage() {
+  function downloadImage(imageUrl: string) {
+    console.log("Downloading", imageUrl);
     const a = document.createElement("a");
-    a.href = resizedImages[0];
+    a.href = imageUrl;
     a.download = "image.jpg";
     a.click();
   }
 
+  async function resizeAndDownload() {
+    await resizeImage(imageUrl, [
+      {
+        width: Number(widthInputRef.current?.value),
+        height: Number(heightInputRef.current?.value),
+      },
+    ]).finally(() => {
+      console.log("Downloaded", resizedImages[0]);
+    });
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <h1>Image Resizer</h1>
+    <div className="flex flex-col gap-4 w-full justify-center items-center p-4">
+      <h1 className="text-2xl font-bold">Image Resizer</h1>
       <div className="flex flex-col gap-4">
         <input type="file" onChange={handleImageChange} />
-        <button onClick={handleAddDimension}>Add</button>
         <h2>Dimensions</h2>
-        <button onClick={handleResize}>Resize</button>
         <div className="flex flex-row gap-2">
           <div className="flex flex-col gap-2">
             <label htmlFor="width">Width</label>
@@ -114,23 +140,27 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 w-full items-center">
           <h2>Uploaded Image</h2>
           {imageUrl && (
-            <Image src={imageUrl} alt="Image" width={100} height={100} />
+            <div className="overflow-auto w-[300px] h-[300px] bg-white p-2 rounded-md">
+              <div className="relative w-full h-full">
+                <Image
+                  src={imageUrl}
+                  alt="Image"
+                  fill
+                  className="object-contain absolute w-full h-full"
+                />
+              </div>
+            </div>
           )}
-          <h2>Resized Images</h2>
-          {resizedImages.map((imageUrl, index) => (
-            <Image
-              key={index}
-              src={imageUrl}
-              alt={`Resized Image ${index}`}
-              width={100}
-              height={100}
-            />
-          ))}
         </div>
-        <button onClick={downloadImage}>Save</button>
+        <button
+          onClick={resizeAndDownload}
+          className="bg-white text-black p-2 rounded-md w-full"
+        >
+          Download
+        </button>
       </div>
     </div>
   );
