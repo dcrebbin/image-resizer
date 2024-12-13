@@ -13,6 +13,13 @@ export default function Home() {
   );
   const imageTitleRef = useRef<HTMLInputElement>(null);
   const dimensions = DEFAULT_DIMENSIONS;
+  const dimensionOptions = {
+    "mac-status-icon": "Mac: Status icon",
+    "mac-app-icon": "Mac: App icon",
+    "mac-sidebar-icon": "Mac: Sidebar icon",
+    "ios-app-icon": "iOS: App icon",
+    "browser-extension-icon": "Browser: Extension icon",
+  };
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -165,8 +172,11 @@ export default function Home() {
           className="bg-white text-black p-2 rounded-md text-center w-full"
           onChange={(e) => setCustomDimension(e.target.value)}
         >
-          <option value="mac-status-icon">Mac: Status icon</option>
-          <option value="mac-app-icon">Mac: App icon</option>
+          {Object.entries(dimensionOptions).map(([key, value]) => (
+            <option key={key} value={key}>
+              {value}
+            </option>
+          ))}
         </select>
         <div className="flex flex-row gap-2 w-full items-start">
           <div className="flex flex-col gap-2 w-full items-center">

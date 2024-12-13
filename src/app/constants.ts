@@ -44,7 +44,7 @@ export const DEFAULT_DIMENSIONS = {
     { width: 167, height: 167 },
     { width: 1024, height: 1024 },
   ],
-  "browser-extension": [
+  "browser-extension-icon": [
     { width: 16, height: 16 },
     { width: 19, height: 19 },
     { width: 32, height: 32 },
