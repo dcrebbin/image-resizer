@@ -19,6 +19,10 @@ export default function ImageResizer() {
     "ios-app-icon": "iOS App icon",
     "browser-extension-icon": "Browser Extension icon",
   };
+  const [customDimension, setCustomDimension] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -133,10 +137,6 @@ export default function ImageResizer() {
     return new Blob([new Uint8Array(byteArrays)], { type });
   }
 
-  function setCustomDimension(dimension: string) {
-    setSelectedDimension(dimension);
-  }
-
   return (
     <div className="inset-0 flex items-center justify-center w-full z-50">
       <div className="w-full mx-20 xl:mx-60 h-fit rounded-lg overflow-hidden shadow-xl">
@@ -161,7 +161,7 @@ export default function ImageResizer() {
           <select
             ref={selectedDimensionRef}
             className="ml-2 bg-gradient-to-b from-[#f0f0f0] to-[#e5e5e5] text-black px-2 py-1 rounded border border-[#858585] shadow-sm hover:from-[#eaf3fc] hover:border-[#0078d7] focus:border-[#0078d7] focus:outline-none focus:ring-1 focus:ring-[#0078d7] w-full cursor-pointer"
-            onChange={(e) => setCustomDimension(e.target.value)}
+            onChange={(e) => setSelectedDimension(e.target.value)}
           >
             {Object.entries(dimensionOptions).map(([key, value]) => (
               <option key={key} value={key}>
@@ -208,6 +208,48 @@ export default function ImageResizer() {
             </div>
             <div className="flex flex-col gap-2 w-full justify-start">
               <h2>Dimensions (px)</h2>
+              <div className="flex flex-row gap-2 w-full items-center">
+                <div className="flex flex-row gap-2 w-full items-start">
+                  <div>
+                    <span className="text-xs font-bold text-black">Width</span>
+                    <input
+                      onChange={(e) => {
+                        const width = parseInt(e.target.value);
+                        setCustomDimension({
+                          width: width,
+                          height: customDimension?.height || 0,
+                        });
+                      }}
+                      type="number"
+                      className="w-16 text-sm bg-white text-black px-2 py-1 rounded border border-[#858585] shadow-sm hover:border-[#0078d7] focus:border-[#0078d7] focus:outline-none focus:ring-1 focus:ring-[#0078d7]"
+                    />
+                  </div>
+
+                  <div>
+                    <span className="text-xs font-bold text-black">Height</span>
+                    <input
+                      onChange={(e) => {
+                        const height = parseInt(e.target.value);
+                        setCustomDimension({
+                          width: customDimension?.width || 0,
+                          height: height,
+                        });
+                      }}
+                      type="number"
+                      className="w-16 text-sm bg-white text-black px-2 py-1 rounded border border-[#858585] shadow-sm hover:border-[#0078d7] focus:border-[#0078d7] focus:outline-none focus:ring-1 focus:ring-[#0078d7]"
+                    />
+                  </div>
+                </div>
+                {imageUrl && (
+                  <button
+                    className="mt-4 bg-white text-black p-2 rounded-md w-10 h-10 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => resizeImage(imageUrl, customDimension)}
+                  >
+                    ⬇
+                  </button>
+                )}
+              </div>
+
               <div className="overflow-scroll w-full h-fit p-2 rounded-md justify-start flex gap-4 flex-col">
                 {dimensions[selectedDimension as keyof typeof dimensions].map(
                   (dimension, index) => (
