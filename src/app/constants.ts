@@ -1,4 +1,13 @@
 export const DEFAULT_DIMENSIONS = {
+  "mac-app-icon": [
+    { width: 16, height: 16 },
+    { width: 32, height: 32 },
+    { width: 64, height: 64 },
+    { width: 128, height: 128 },
+    { width: 256, height: 256 },
+    { width: 512, height: 512 },
+    { width: 1024, height: 1024 },
+  ],
   "mac-status-icon": [
     { width: 7, height: 7 },
     { width: 14, height: 14 },
@@ -10,14 +19,15 @@ export const DEFAULT_DIMENSIONS = {
     { width: 100, height: 100 },
     { width: 200, height: 200 },
   ],
-  "mac-app-icon": [
+  "mac-sidebar-icon": [
     { width: 16, height: 16 },
     { width: 32, height: 32 },
+    { width: 18, height: 18 },
+    { width: 24, height: 24 },
+    { width: 32, height: 32 },
+    { width: 36, height: 36 },
+    { width: 48, height: 48 },
     { width: 64, height: 64 },
-    { width: 128, height: 128 },
-    { width: 256, height: 256 },
-    { width: 512, height: 512 },
-    { width: 1024, height: 1024 },
   ],
   "ios-app-icon": [
     { width: 40, height: 40 },
