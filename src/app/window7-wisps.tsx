@@ -1,4 +1,7 @@
+"use client";
+
 export default function Window7Wisps() {
+  if (typeof window === "undefined") return null;
   return (
     <div className="fixed inset-0 -z-10 w-full h-full">
       <div className="fixed -z-5 left-0 bottom-0 w-full">

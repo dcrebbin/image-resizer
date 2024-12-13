@@ -139,9 +139,7 @@ export default function Home() {
     setSelectedDimension(dimension);
   }
 
-  const memoizedWindow7Wisps = useMemo(() => {
-    return <Window7Wisps />;
-  }, []);
+  const memoizedWindow7Wisps = useMemo(() => <Window7Wisps />, []);
 
   return (
     <div className="flex flex-col gap-4 w-full justify-center items-center z-50">
