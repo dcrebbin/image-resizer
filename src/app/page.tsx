@@ -84,7 +84,7 @@ export default function Home() {
     const imageTitle =
       imageTitleRef.current?.value
         .toLowerCase()
-        .replace(/[^a-zA-Z0-9]/g, "_") || "image";
+        .replace(/[^a-zA-Z0-9]/g, "-") || "image";
 
     if (imageUrls.length == 1) {
       const base64Data = imageUrls[0].split(",")[1];
@@ -104,9 +104,7 @@ export default function Home() {
       zip.file(
         `${imageTitle}-${
           dimensions[selectedDimension as keyof typeof dimensions][index].width
-        }x${
-          dimensions[selectedDimension as keyof typeof dimensions][index].height
-        }.png`,
+        }x.png`,
         blob
       );
     });
