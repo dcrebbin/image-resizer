@@ -14,6 +14,9 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "EZ Resizer",
+  icons: {
+    icon: "/favicon.svg",
+  },
   description:
     "Client side image resizer for efficiently resizing app and promotional images",
 };
