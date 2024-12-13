@@ -83,13 +83,13 @@ export default function Home() {
 
     imageUrls.forEach((imageUrl, index) => {
       const base64Data = imageUrl.split(",")[1];
-      const blob = base64ToBlob(base64Data, "image/jpeg");
+      const blob = base64ToBlob(base64Data, "image/png");
       zip.file(
         `${
           dimensions[selectedDimension as keyof typeof dimensions][index].width
         }x${
           dimensions[selectedDimension as keyof typeof dimensions][index].height
-        }.jpg`,
+        }.png`,
         blob
       );
     });
@@ -118,15 +118,24 @@ export default function Home() {
 
   return (
     <div className="flex flex-col gap-4 w-full justify-center items-center p-4">
-      <h1 className="text-2xl font-bold">Image Resizer</h1>
-      <h2 className="text-sm text-white">
+      <h1 className="text-2xl font-bold">EZ Image Resizer</h1>
+      <h2 className="text-sm text-white italic">
         Client Side Image Resizer for Icons & Promotional Images
       </h2>
+      <span className="text-sm text-white w-[50%] text-center">
+        Upload the highest resolution image you have, select a default dimension
+        then download the images as a zip.
+        <br />
+      </span>
+      <a href="https://github.com/dcrebbin/image-resizer" className="underline">
+        Github Repo
+      </a>
       <div className="flex flex-col gap-4">
         <div>
           <input type="file" onChange={handleImageChange} />
           <button
-            className="bg-white text-black p-2 rounded-md w-fit"
+            disabled={!imageUrl}
+            className="bg-white text-black p-2 rounded-md w-fit disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={() => setImageUrl(null)}
           >
             Clear
@@ -146,6 +155,7 @@ export default function Home() {
               <h2>Selected Image</h2>
               <div className="overflow-auto w-[300px] h-[300px] bg-white p-2 rounded-md">
                 <div className="relative w-full h-full">
+                  <div className="absolute inset-0 bg-[repeating-conic-gradient(#808080_0_90deg,#ffffff_90deg_180deg)] bg-[length:20px_20px] opacity-50"></div>
                   {imageUrl && (
                     <Image
                       src={imageUrl}
@@ -163,14 +173,15 @@ export default function Home() {
               </div>
             </div>
             <button
+              disabled={!imageUrl}
               onClick={() => resizeImage(imageUrl)}
-              className="bg-white text-black p-2 rounded-md w-full"
+              className="bg-white text-black p-2 rounded-md w-full disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Download
             </button>
           </div>
           <div className="flex flex-col gap-2 w-full justify-start">
-            <h2>Dimensions</h2>
+            <h2>Dimensions (px)</h2>
             <div className="overflow-auto w-[100] h-[300px] p-2 rounded-md justify-start">
               {dimensions[selectedDimension as keyof typeof dimensions].map(
                 (dimension, index) => (
