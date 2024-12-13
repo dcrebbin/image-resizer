@@ -14,11 +14,11 @@ export default function Home() {
   const imageTitleRef = useRef<HTMLInputElement>(null);
   const dimensions = DEFAULT_DIMENSIONS;
   const dimensionOptions = {
-    "mac-status-icon": "Mac: Status icon",
-    "mac-app-icon": "Mac: App icon",
-    "mac-sidebar-icon": "Mac: Sidebar icon",
-    "ios-app-icon": "iOS: App icon",
-    "browser-extension-icon": "Browser: Extension icon",
+    "mac-status-icon": "Mac Status icon",
+    "mac-app-icon": "Mac App icon",
+    "mac-sidebar-icon": "Mac Sidebar icon",
+    "ios-app-icon": "iOS App icon",
+    "browser-extension-icon": "Browser Extension icon",
   };
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
