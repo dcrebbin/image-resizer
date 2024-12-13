@@ -1,6 +1,6 @@
 "use client";
 import { useMemo } from "react";
-import Window7Wisps from "./components/window7-wisps";
+import Window7Wisps from "./window7-wisps";
 import ImageResizer from "./components/image-resizer";
 import IntroDialog from "./components/intro-dialog";
 
