@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import Image from "next/image";
 import JSZip from "jszip";
 import { DEFAULT_DIMENSIONS } from "./constants";
+import Window7Wisps from "./window7-wisps";
 export default function Home() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const selectedDimensionRef = useRef<HTMLSelectElement>(null);
@@ -138,110 +139,146 @@ export default function Home() {
     setSelectedDimension(dimension);
   }
 
+  const memoizedWindow7Wisps = useMemo(() => {
+    return <Window7Wisps />;
+  }, []);
+
   return (
-    <div className="flex flex-col gap-4 w-full justify-center items-center p-4">
-      <h1 className="text-2xl font-bold">EZ Image Resizer</h1>
-      <h2 className="text-sm text-white italic">
-        Client Side Image Resizer for Icons & Promotional Images
-      </h2>
-      <span className="text-sm text-white w-[50%] text-center">
-        Upload the highest resolution image you have, select a default dimension
-        then download the images as a zip.
-        <br />
-      </span>
-      <a
-        href="https://github.com/dcrebbin/image-resizer"
-        target="_blank"
-        className="underline"
-      >
-        Github Repo
-      </a>
-      <div className="flex flex-col gap-4">
-        <div>
-          <input type="file" onChange={handleImageChange} />
-          <button
-            disabled={!imageUrl}
-            className="bg-white text-black p-2 rounded-md w-fit disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() => setImageUrl(null)}
-          >
-            Clear
-          </button>
+    <div className="flex flex-col gap-4 w-full justify-center items-center z-50">
+      <div className="inset-0 flex items-center justify-center p-4">
+        <div className="w-full mx-20 h-fit rounded-lg overflow-hidden shadow-xl">
+          <div className="h-8 bg-gradient-to-b from-[#2584e4] via-[#0f71ce] to-[#3a8cda] flex items-center px-3">
+            <span className="text-white text-sm font-semibold">
+              Ez Image Resizer
+            </span>
+          </div>
+          <div className="bg-gradient-to-b from-[#f0f0f0] to-[#e5e5e5] h-[calc(100%-32px)] border-l border-r border-b border-[#858585] text-black p-4">
+            <h2 className="text-sm text-black italic">
+              Client Side Image Resizer for Icons & Promotional Images
+            </h2>
+            <span className="text-sm w-[50%] text-center">
+              Upload the highest resolution image you have, select a default
+              dimension then download the images as a zip.
+              <br />
+            </span>
+            <a
+              href="https://github.com/dcrebbin/image-resizer"
+              target="_blank"
+              className="underline"
+            >
+              Github Repo
+            </a>
+          </div>
         </div>
-        <select
-          ref={selectedDimensionRef}
-          className="bg-white text-black p-2 rounded-md text-center w-full"
-          onChange={(e) => setCustomDimension(e.target.value)}
-        >
-          {Object.entries(dimensionOptions).map(([key, value]) => (
-            <option key={key} value={key}>
-              {value}
-            </option>
-          ))}
-        </select>
-        <div className="flex flex-row gap-2 w-full items-start">
-          <div className="flex flex-col gap-2 w-full items-center">
-            <div className="flex flex-col gap-2 w-full items-center">
-              <h2>Selected Image</h2>
-              <div className="overflow-auto w-[300px] h-[300px] bg-white p-2 rounded-md">
-                <div className="relative w-full h-full">
-                  <div className="absolute  inset-0 bg-[repeating-conic-gradient(#808080_0_90deg,#ffffff_90deg_180deg)] bg-[length:20px_20px] opacity-50"></div>
-                  {!imageUrl && (
-                    <span className="absolute w-full h-full flex items-center justify-center text-8xl">
-                      📷
-                    </span>
-                  )}
-                  {imageUrl && (
-                    <Image
-                      src={imageUrl}
-                      alt="Image"
-                      fill
-                      className="object-contain absolute w-full h-full"
-                    />
+      </div>
+
+      <div className="inset-0 flex items-center justify-center w-full z-50">
+        <div className="w-full mx-20 xl:mx-60 h-fit rounded-lg overflow-hidden shadow-xl">
+          <div className="h-8 bg-gradient-to-b from-[#2584e4] via-[#0f71ce] to-[#3a8cda] flex items-center px-3">
+            <span className="text-white text-sm font-semibold">
+              Resize Image
+            </span>
+          </div>
+          <div className="bg-gradient-to-b from-[#f0f0f0] to-[#e5e5e5] h-[calc(100%-32px)] border-l border-r border-b border-[#858585] text-black p-4">
+            <div className="flex flex-row w-full items-center justify-between mb-2">
+              <input
+                className="  text-black px-2 py-1 rounded  hover:border-[#0078d7] focus:border-[#0078d7] focus:outline-none focus:ring-1 focus:ring-[#0078d7] w-full cursor-pointer"
+                type="file"
+                onChange={handleImageChange}
+              />
+              <button
+                disabled={!imageUrl}
+                className="bg-gradient-to-b from-[#f0f0f0] to-[#e5e5e5] text-black px-4 py-1 rounded border border-[#858585] shadow-sm hover:from-[#eaf3fc] hover:to-[#dcebfc] active:from-[#cce4fc] active:to-[#dcebfc] disabled:opacity-50 disabled:cursor-not-allowed w-fit"
+                onClick={() => setImageUrl(null)}
+              >
+                Clear
+              </button>
+            </div>
+            <select
+              ref={selectedDimensionRef}
+              className="ml-2 bg-gradient-to-b from-[#f0f0f0] to-[#e5e5e5] text-black px-2 py-1 rounded border border-[#858585] shadow-sm hover:from-[#eaf3fc] hover:border-[#0078d7] focus:border-[#0078d7] focus:outline-none focus:ring-1 focus:ring-[#0078d7] w-full cursor-pointer"
+              onChange={(e) => setCustomDimension(e.target.value)}
+            >
+              {Object.entries(dimensionOptions).map(([key, value]) => (
+                <option key={key} value={key}>
+                  {value}
+                </option>
+              ))}
+            </select>
+            <div className="flex flex-row gap-2 w-full items-start">
+              <div className="flex flex-col gap-2 w-full items-center">
+                <div className="flex flex-col gap-2 w-full items-center">
+                  <h2>Selected Image</h2>
+                  <div className="overflow-auto w-[450px] h-[400px] bg-white p-2 rounded-md">
+                    <div className="relative w-full h-full">
+                      <div className="absolute  inset-0 bg-[repeating-conic-gradient(#808080_0_90deg,#ffffff_90deg_180deg)] bg-[length:20px_20px] opacity-50"></div>
+                      {!imageUrl && (
+                        <span className="absolute w-full h-full flex items-center justify-center text-8xl">
+                          📷
+                        </span>
+                      )}
+                      {imageUrl && (
+                        <Image
+                          src={imageUrl}
+                          alt="Image"
+                          fill
+                          className="object-contain absolute w-full h-full"
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <input
+                  type="text"
+                  ref={imageTitleRef}
+                  placeholder="my-cool-image-title"
+                  className="bg-white text-black px-2 py-1 rounded border border-[#858585] shadow-sm hover:border-[#0078d7] focus:border-[#0078d7] focus:outline-none focus:ring-1 focus:ring-[#0078d7] w-full"
+                />
+                <button
+                  disabled={!imageUrl}
+                  onClick={() => resizeImage(imageUrl)}
+                  className="bg-gradient-to-b from-[#f0f0f0] to-[#e5e5e5] text-black px-4 py-1 rounded border border-[#858585] shadow-sm hover:from-[#eaf3fc] hover:to-[#dcebfc] active:from-[#cce4fc] active:to-[#dcebfc] disabled:opacity-50 disabled:cursor-not-allowed w-fit"
+                >
+                  Download All
+                </button>
+              </div>
+              <div className="flex flex-col gap-2 w-full justify-start">
+                <h2>Dimensions (px)</h2>
+                <div className="overflow-scroll w-full h-fit p-2 rounded-md justify-start flex gap-4 flex-col">
+                  {dimensions[selectedDimension as keyof typeof dimensions].map(
+                    (dimension, index) => (
+                      <div
+                        key={index}
+                        className="flex flex-row gap-2 h-full items-center justify-between"
+                      >
+                        <span className="text-sm text-black underline w-full">
+                          {dimension.width}x{dimension.height}
+                        </span>
+                        {imageUrl && (
+                          <button
+                            className="bg-white text-black p-2 rounded-md w-10 h-10 disabled:opacity-50 disabled:cursor-not-allowed"
+                            onClick={() => resizeImage(imageUrl, dimension)}
+                          >
+                            ⬇
+                          </button>
+                        )}
+                      </div>
+                    )
                   )}
                 </div>
               </div>
             </div>
-            <input
-              type="text"
-              ref={imageTitleRef}
-              placeholder="my-cool-image-title"
-              className="bg-white text-black p-2 rounded-md w-full"
-            />
-            <button
-              disabled={!imageUrl}
-              onClick={() => resizeImage(imageUrl)}
-              className="bg-white text-black p-2 rounded-md w-full disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Download All
-            </button>
-          </div>
-          <div className="flex flex-col gap-2 w-full justify-start">
-            <h2>Dimensions (px)</h2>
-            <div className="overflow-auto w-full h-full p-2 rounded-md justify-start flex gap-4 flex-col">
-              {dimensions[selectedDimension as keyof typeof dimensions].map(
-                (dimension, index) => (
-                  <div
-                    key={index}
-                    className="flex flex-row gap-2 h-full items-center justify-between"
-                  >
-                    <span className="text-sm text-white underline w-full">
-                      {dimension.width}x{dimension.height}
-                    </span>
-                    {imageUrl && (
-                      <button
-                        className="bg-white text-black p-2 rounded-md w-10 h-10 disabled:opacity-50 disabled:cursor-not-allowed"
-                        onClick={() => resizeImage(imageUrl, dimension)}
-                      >
-                        ⬇
-                      </button>
-                    )}
-                  </div>
-                )
-              )}
-            </div>
           </div>
         </div>
       </div>
+
+      <div className="fixed z-50 bottom-0 w-full h-10 bg-gradient-to-b from-[#2584e4] via-[#0f71ce] to-[#3a8cda] flex items-center px-3">
+        <span className="text-white text-sm font-semibold">
+          Ez Image Resizer
+        </span>
+      </div>
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[#225baa] via-[#4fc3f7] to-[#225baa]"></div>
+      {memoizedWindow7Wisps}
     </div>
   );
 }
