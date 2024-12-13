@@ -66,7 +66,7 @@ export default function Home() {
         ctx.drawImage(img, 0, 0, width, height);
 
         // Convert to base64
-        return canvas.toDataURL("image/jpeg", 0.9);
+        return canvas.toDataURL("image/png", 0.9);
       });
       console.log("Resized images", resizedImages);
       downloadImage(resizedImages);
